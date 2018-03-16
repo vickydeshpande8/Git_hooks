@@ -1,0 +1,23 @@
+#!/bin/bash
+pwd=$(pwd)
+while read oldrev newrev refname
+do
+    branch=$(git rev-parse --symbolic --abbrev-ref $refname)
+    echo "____________________________________________________"
+    echo $branch
+    echo "+++++++++++++++++old++++++++++++++++++++++++++++++++"
+    echo $oldrev
+    echo "+++++++++++++++++new++++++++++++++++++++++++++++++++"
+    echo $newrev
+    echo "+++++++++++++++++refspec++++++++++++++++++++++++++++++++"
+    echo $refname
+    echo "+++++++++++++++++push details++++++++++++++++++++++++++++++++"
+    git diff --name-only $oldrev $newrev
+    echo "____________________________________________________"
+    echo "____________________________________________________"
+    if [ -e $pwd/custom_hooks/post_merge_hook.py ]
+    then
+        python $pwd/custom_hooks/post_merge_hook.py $oldrev $newrev
+    fi
+    python $pwd/custom_hooks/pre-receive.py $oldrev $newrev $refname
+done
